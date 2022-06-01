@@ -2,12 +2,12 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 class Allergy(models.Model):
-    #user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     which_allergy=models.CharField(max_length=100)
     is_category=models.BooleanField(default=False)
 
 class Favor_Category(models.Model):
-    #user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     is_public = models.BooleanField(default=False)
     favor_category=models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -15,7 +15,7 @@ class Favor_Category(models.Model):
 
 class Daily_Meal(models.Model):
     meal_id=models.IntegerField(primary_key=True)
-    #uid=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now= True)
     morning = models.BooleanField(default=False)
