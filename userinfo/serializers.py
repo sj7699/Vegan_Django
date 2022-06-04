@@ -14,6 +14,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         required=True,
         validators=[validate_password],
     )
+    password2=serializers.CharField(write_only=True,required=True)
+    class Meta:
+        model = User
+        fields = ('username','pssword','password2','email')
+    def vaildate(self,data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError(
+                {"password":"Password fields didn't match"}
+            )
+        return data
 class Favorcategoryserializers(serializers.ModelSerializer):
     class Meta:
         model=Favor_Category
