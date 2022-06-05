@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from userinfo.models import Favor_Category,Product
-from .serializers import Favorcategoryserializers
+from .serializers import Favorcategoryserializers,Productserializers
 from rest_framework import viewsets,generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import random
 class RegisterView(generics.CreateAPIView):
     queryset=User.objects.all()
     serializer_class=RegisterSerializer
@@ -26,6 +27,8 @@ class FavorcategorySet(viewsets.ModelViewSet):
 
 class CutcaloryView(viewsets.ModelViewSet):
     randombag=Product.objects.all()
+    serializer_class=Productserializers
     
+
 
 # Create your views here.
