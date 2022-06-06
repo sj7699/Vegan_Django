@@ -1,11 +1,13 @@
 from django.forms import ValidationError
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from userinfo.models import Favor_Category,Product
 from .serializers import *
 from rest_framework import viewsets,generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication ,TokenAuthentication
 import random
 class FavorcategorySet(viewsets.ModelViewSet):
     queryset=Favor_Category.objects.all()
@@ -67,9 +69,11 @@ class ProductSet(viewsets.ModelViewSet):
 class rlist(viewsets.ReadOnlyModelViewSet):
     queryset=Product.objects.all().order_by('?')
     serializer_class=Productserializers
+    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
     def get_queryset(self):
         calory=self.request.query_params.get('calory',None)
         rqs=self.queryset.order_by('?')
+        print(self.request.user.id)
         if not calory.isdigit():
             raise ValidationError("칼로리는 숫자만")
         wtime=self.request.query_params.get('time',None)
@@ -88,15 +92,15 @@ class rlist(viewsets.ReadOnlyModelViewSet):
             c+=nowc
             cutcqs.append(x)
         if(wtime=="아침"):
-            mid=Daily_Meal.objects.create(user=self.request.user.id,morning=True)
+            mid=Daily_Meal.objects.create(user=self.request.user,morning=True)
             for x in cutcqs:
                 MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         if(wtime=="점심"):
-            mid=Daily_Meal.objects.create(user=self.request.user.id,lunch=True)
+            mid=Daily_Meal.objects.create(user=self.request.user,lunch=True)
             for x in cutcqs:
                 MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         if(wtime=="점심"):
-            mid=Daily_Meal.objects.create(user=self.request.user.id,dinner=True)
+            mid=Daily_Meal.objects.create(user=self.request.user,dinner=True)
             for x in cutcqs:
                 MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         return cutcqs

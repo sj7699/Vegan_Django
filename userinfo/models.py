@@ -19,7 +19,7 @@ class Daily_Meal(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
     morning = models.BooleanField(default=False)
     lunch = models.BooleanField(default=False)
-    dinner = models.BooleanField(default=True)
+    dinner = models.BooleanField(default=False)
 
 class Product(models.Model):
     product_name=models.CharField(max_length=100)
