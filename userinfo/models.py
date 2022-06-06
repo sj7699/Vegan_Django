@@ -23,6 +23,7 @@ class Daily_Meal(models.Model):
 
 class Product(models.Model):
     product_name=models.CharField(max_length=100)
+    company=models.CharField(max_length=100,default="")
     amount=models.IntegerField()
     calory=models.IntegerField(default=0)
     carbohydrate=models.IntegerField()
@@ -30,9 +31,11 @@ class Product(models.Model):
     protein=models.IntegerField()
     fat=models.IntegerField()
     sat_fat=models.IntegerField()
+    trans_fat=models.IntegerField(default=0)
     cholesterol=models.IntegerField()
-    product_category=models.CharField(max_length=50)
+    product_category=models.CharField(max_length=50,default="")
     price=models.IntegerField()
+    soduim=models.IntegerField(default=0)
     product_image=models.ImageField(upload_to="product_image/%Y/%m/%d",default='DEFAULT.jpg')
 
 class MEAL_PRODUCT(models.Model):

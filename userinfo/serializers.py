@@ -43,6 +43,25 @@ class Productserializers(serializers.ModelSerializer):
     class Meta:
         model=Product
         fields='__all__'
+    def validate_product_name(self,instance):
+        if(len(instance)<2):
+            raise serializers.ValidationError(detail="상품이름이 너무 짧습니다")
+        return instance
+    
+    def validate_price(self,instance):
+        if(instance<=0):
+            raise serializers.ValidationError(detail="가격이 너무 낮습니다.")
+        return instance
+
+    def validate_product_category(self,instance):
+        if(len(instance)<1):
+            raise serializers.ValidationError(detail="카테고리를 입력해주세요.")
+        return instance
+
+    def validate_amount(self,instance):
+        if(instance<1):
+            raise serializers.ValidationError(detail="용량이 너무 낮습니다")
+        return instance
 
 class MEAL_PRODUCTserializers(serializers.ModelSerializer):
     class Meta:

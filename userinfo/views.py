@@ -33,10 +33,37 @@ class ProductSet(viewsets.ModelViewSet):
         qs=self.queryset
         serializer = self.get_serializer(qs,many=True)
         return Response(serializer.data)
+    
+    @action(detail=False)
+    def rlist(self,request):
+        qs=self.queryset.order_by('?')[:5]
+        serializer = self.get_serializer(qs,many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False)
+    def order_by_name(self,request):
+        qs=self.queryset.order_by('product_name')
+        serializer= self.get_serializer(qs,many=True)
+        return Response(serializer.data)  
+    
+    @action(detail=False)
+    def order_by_rname(self,request):
+        qs=self.queryset.order_by('-product_name')
+        serializer= self.get_serializer(qs,many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False)
+    def order_by_price(self,request):
+        qs=self.queryset.order_by('price')
+        serializer= self.get_serializer(qs,many=True)
+        return Response(serializer.data)
 
-class CutcaloryView(viewsets.ModelViewSet):
-    randombag=Product.objects.all().order_by('?')[:10]
-    serializer_class=Productserializers
+    @action(detail=False)
+    def order_by_rprice(self,request):
+        qs=self.queryset.order_by('-price')
+        serializer= self.get_serializer(qs,many=True)
+        return Response(serializer.data)
+
 
 
 # Create your views here.
