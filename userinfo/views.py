@@ -7,9 +7,6 @@ from rest_framework import viewsets,generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import random
-class RegisterView(generics.CreateAPIView):
-    queryset=User.objects.all()
-    serializer_class=RegisterSerializer
 class FavorcategorySet(viewsets.ModelViewSet):
     queryset=Favor_Category.objects.all()
     serializer_class = Favorcategoryserializers
@@ -76,10 +73,11 @@ class rlist(viewsets.ReadOnlyModelViewSet):
         if not calory.isdigit():
             raise ValidationError("칼로리는 숫자만")
         wtime=self.request.query_params.get('time',None)
+        print(wtime)
         if(wtime is None):
             raise ValidationError("식사할 시간을 입력해주세요 예) 아침 점심 저녁")
-        if(wtime!="아침" or wtime!="점심" or wtime!="저녁"):
-            raise ValidationError("식사할 시간을 입력해주세요 예) 아침 점심 저녁")
+        if(wtime!="아침" and wtime!="점심" and wtime!="저녁"):
+            raise ValidationError("식사할 시간을 정확히 입력해주세요 예) 아침 점심 저녁")
         calory=float(calory)
         c=0
         cutcqs=[]
@@ -90,17 +88,17 @@ class rlist(viewsets.ReadOnlyModelViewSet):
             c+=nowc
             cutcqs.append(x)
         if(wtime=="아침"):
-            mid=Daily_Meal.objects.create(user=self.request.user,morning=True)
+            mid=Daily_Meal.objects.create(user=self.request.user.id,morning=True)
             for x in cutcqs:
-                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x.id)
+                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         if(wtime=="점심"):
-            mid=Daily_Meal.objects.create(user=self.request.user,lunch=True)
+            mid=Daily_Meal.objects.create(user=self.request.user.id,lunch=True)
             for x in cutcqs:
-                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x.id)
+                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         if(wtime=="점심"):
-            mid=Daily_Meal.objects.create(user=self.request.user,dinner=True)
+            mid=Daily_Meal.objects.create(user=self.request.user.id,dinner=True)
             for x in cutcqs:
-                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x.id)
+                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         return cutcqs
 
 
