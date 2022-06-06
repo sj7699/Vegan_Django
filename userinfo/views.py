@@ -26,6 +26,14 @@ class FavorcategorySet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+class Daily_MealSet(viewsets.ReadOnlyModelViewSet):
+    queryset=Daily_Meal.objects.all()
+    serializer_class = Daily_Mealserializers
+
+class Meal_ProductSet(viewsets.ReadOnlyModelViewSet):
+    queryset=MEAL_PRODUCT.objects.all()
+    serializer_class = MEAL_PRODUCTserializers
+
 class ProductSet(viewsets.ModelViewSet):
     queryset=Product.objects.all()
     serializer_class = Productserializers
@@ -63,10 +71,15 @@ class rlist(viewsets.ReadOnlyModelViewSet):
     queryset=Product.objects.all().order_by('?')
     serializer_class=Productserializers
     def get_queryset(self):
-        calory=self.request.query_params.get('calory','')
+        calory=self.request.query_params.get('calory',None)
         rqs=self.queryset.order_by('?')
         if not calory.isdigit():
             raise ValidationError("칼로리는 숫자만")
+        wtime=self.request.query_params.get('time',None)
+        if(wtime is None):
+            raise ValidationError("식사할 시간을 입력해주세요 예) 아침 점심 저녁")
+        if(wtime!="아침" or wtime!="점심" or wtime!="저녁"):
+            raise ValidationError("식사할 시간을 입력해주세요 예) 아침 점심 저녁")
         calory=float(calory)
         c=0
         cutcqs=[]
@@ -76,6 +89,18 @@ class rlist(viewsets.ReadOnlyModelViewSet):
                 break
             c+=nowc
             cutcqs.append(x)
+        if(wtime=="아침"):
+            mid=Daily_Meal.objects.create(user=self.request.user,morning=True)
+            for x in cutcqs:
+                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x.id)
+        if(wtime=="점심"):
+            mid=Daily_Meal.objects.create(user=self.request.user,lunch=True)
+            for x in cutcqs:
+                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x.id)
+        if(wtime=="점심"):
+            mid=Daily_Meal.objects.create(user=self.request.user,dinner=True)
+            for x in cutcqs:
+                MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x.id)
         return cutcqs
 
 
