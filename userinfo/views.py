@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from userinfo.models import Favor_Category,Product
@@ -33,13 +34,7 @@ class ProductSet(viewsets.ModelViewSet):
         qs=self.queryset
         serializer = self.get_serializer(qs,many=True)
         return Response(serializer.data)
-    
-    @action(detail=False)
-    def rlist(self,request):
-        qs=self.queryset.order_by('?')[:5]
-        serializer = self.get_serializer(qs,many=True)
-        return Response(serializer.data)
-    
+
     @action(detail=False)
     def order_by_name(self,request):
         qs=self.queryset.order_by('product_name')
@@ -63,6 +58,25 @@ class ProductSet(viewsets.ModelViewSet):
         qs=self.queryset.order_by('-price')
         serializer= self.get_serializer(qs,many=True)
         return Response(serializer.data)
+
+class rlist(viewsets.ReadOnlyModelViewSet):
+    queryset=Product.objects.all().order_by('?')
+    serializer_class=Productserializers
+    def get_queryset(self):
+        calory=self.request.query_params.get('calory','')
+        rqs=self.queryset.order_by('?')
+        if not calory.isdigit():
+            raise ValidationError("칼로리는 숫자만")
+        calory=float(calory)
+        c=0
+        cutcqs=[]
+        for x in rqs:
+            nowc=x.calory
+            if(nowc+c>calory):
+                break
+            c+=nowc
+            cutcqs.append(x)
+        return cutcqs
 
 
 
