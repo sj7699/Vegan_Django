@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from userinfo.models import Favor_Category,Product
-from .serializers import Favorcategoryserializers,Productserializers
+from .serializers import *
 from rest_framework import viewsets,generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -25,10 +25,18 @@ class FavorcategorySet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+class ProductSet(viewsets.ModelViewSet):
+    queryset=Product.objects.all()
+    serializer_class = Productserializers
+    @action(detail=False)
+    def plist(self,request):
+        qs=self.queryset
+        serializer = self.get_serializer(qs,many=True)
+        return Response(serializer.data)
+
 class CutcaloryView(viewsets.ModelViewSet):
-    randombag=Product.objects.all()
+    randombag=Product.objects.all().order_by('?')[:10]
     serializer_class=Productserializers
-    
 
 
 # Create your views here.

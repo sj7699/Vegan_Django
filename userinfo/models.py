@@ -14,7 +14,6 @@ class Favor_Category(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
 
 class Daily_Meal(models.Model):
-    meal_id=models.IntegerField(primary_key=True)
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now= True)
@@ -23,9 +22,9 @@ class Daily_Meal(models.Model):
     dinner = models.BooleanField(default=True)
 
 class Product(models.Model):
-    product_id=models.IntegerField(primary_key=True)
     product_name=models.CharField(max_length=100)
     amount=models.IntegerField()
+    calory=models.IntegerField(default=0)
     carbohydrate=models.IntegerField()
     sugar=models.IntegerField()
     protein=models.IntegerField()
@@ -37,21 +36,17 @@ class Product(models.Model):
     product_image=models.ImageField(upload_to="product_image/%Y/%m/%d",default='DEFAULT.jpg')
 
 class MEAL_PRODUCT(models.Model):
-    meal_id=models.ForeignKey(Daily_Meal,on_delete=models.CASCADE)
-    product_id=models.ForeignKey(Product,on_delete=models.CASCADE)
+    meal_id=models.ForeignKey(Daily_Meal,on_delete=models.CASCADE,related_name='meal',db_column='meal_id')
+    product_id=models.ForeignKey(Product,on_delete=models.CASCADE,related_name='product',db_column='product_id')
 
 
 class Ingredient_Detail(models.Model):
-    ingredient_id=models.IntegerField(primary_key=True)
+    ingredient_id=models.BigAutoField(primary_key=True)
     ingredient_category=models.CharField(max_length=50)
 
 class Product_Ingredient:
-    product_id=models.ForeignKey(Product,on_delete=models.CASCADE)
-    ingredient_id=models.ForeignKey(Ingredient_Detail,on_delete=models.CASCADE)
+    product_id=models.ForeignKey(Product,on_delete=models.CASCADE,related_name='product',db_column='product_id')
+    ingredient_id=models.ForeignKey(Ingredient_Detail,on_delete=models.CASCADE,related_name='Ingredient',db_column='Ingredient_id')
     ingredient_name=models.CharField(max_length=100)
-
-class MEAL_PRODUCT(models.Model):
-    meal_id=models.ForeignKey(Daily_Meal,on_delete=models.CASCADE)
-    product_id=models.ForeignKey(Product,on_delete=models.CASCADE)
 
 # Create your models here.
