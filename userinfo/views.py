@@ -8,6 +8,8 @@ from rest_framework import viewsets,generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication ,TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 import random
 class FavorcategorySet(viewsets.ModelViewSet):
     queryset=Favor_Category.objects.all()
@@ -38,6 +40,7 @@ class ProductSet(viewsets.ModelViewSet):
     serializer_class = Productserializers
     @action(detail=False)
     def plist(self,request):
+        
         qs=self.queryset
         serializer = self.get_serializer(qs,many=True)
         return Response(serializer.data)
@@ -69,8 +72,10 @@ class ProductSet(viewsets.ModelViewSet):
 class rlist(viewsets.ReadOnlyModelViewSet):
     queryset=Product.objects.all().order_by('?')
     serializer_class=Productserializers
-    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
+    authentication_classes = [JWTAuthentication, BasicAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
+        print(self.request.user.token)
         calory=self.request.query_params.get('calory',None)
         rqs=self.queryset.order_by('?')
         print(self.request.user.id)
@@ -104,7 +109,4 @@ class rlist(viewsets.ReadOnlyModelViewSet):
             for x in cutcqs:
                 MEAL_PRODUCT.objects.create(meal_id=mid,product_id=x)
         return cutcqs
-
-
-
 # Create your views here.
