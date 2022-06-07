@@ -1,17 +1,19 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-class Allergy(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,null=True)
-    which_allergy=models.CharField(max_length=100)
-    is_category=models.BooleanField(default=False)
+class User_Detail(models.Model):
+    user= models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,null=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    exercise = models.CharField(max_length=10,default="")
+    gender=models.CharField(max_length=20)
+    height=models.FloatField()
+    weight=models.FloatField()
+    vegan_option=models.CharField(max_length=50,default="")
+    allergy=models.CharField(max_length=50,default="")
+    favor_category=models.CharField(max_length=50,default="")
+    avoid_category=models.CharField(max_length=50,default="")
 
-class Favor_Category(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,null=True)
-    is_public = models.BooleanField(default=False)
-    favor_category=models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now= True)
 
 class Daily_Meal(models.Model):
     user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,null=True)
@@ -23,21 +25,26 @@ class Daily_Meal(models.Model):
 
 class Product(models.Model):
     product_name=models.CharField(max_length=100)
-    company=models.CharField(max_length=100,default="")
+    price=models.IntegerField()
+    company=models.CharField(max_length=100,default="") 
+    ingredient=models.CharField(max_length=800,default="Nothing")
     amount=models.FloatField()
-    calory=models.FloatField(default=0)
+    soduim=models.FloatField()
     carbohydrate=models.FloatField()
     sugar=models.FloatField()
-    protein=models.FloatField()
     fat=models.FloatField()
-    sat_fat=models.FloatField()
     trans_fat=models.FloatField(default=0.0)
+    sat_fat=models.FloatField()
     cholesterol=models.FloatField()
+    protein=models.FloatField()
+    calory=models.FloatField(default=0)
+    vegan_option=models.CharField(max_length=50)
+    specific=models.CharField(max_length=100)
+    primary_type=models.CharField(max_length=50)
+    secondary_type=models.CharField(max_length=50)
     product_category=models.CharField(max_length=50,default="")
-    price=models.IntegerField()
-    soduim=models.FloatField()
+    cooking_type=models.CharField(max_length=50)
     product_image=models.ImageField(upload_to="product_image/%Y/%m/%d",default='DEFAULT.jpg')
-    ingredient=models.CharField(max_length=800,default="Nothing")
 
 class MEAL_PRODUCT(models.Model):
     meal_id=models.ForeignKey(Daily_Meal,on_delete=models.CASCADE,related_name='meal',db_column='meal_id')

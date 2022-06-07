@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from userinfo.models import *
 from .serializers import *
 from django.db.models import Q
-from rest_framework import viewsets,generics,exceptions
+from rest_framework import viewsets,generics,exceptions,status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication ,TokenAuthentication
@@ -38,14 +38,23 @@ class User_DetailSet(viewsets.ModelViewSet):
         moduser=self.request.data
         qs=get_object_or_404(self.queryset,user=nowuser)
         qs.exercise = moduser.get('exercise',qs.exercise)
+        if(qs.exercise!="low" and qs.exercise!="middle" and qs.exercise!="high"):
+            raise exceptions.ParseError("exercise should be low middle high")
         qs.gender=moduser.get('gender',qs.gender)
         qs.height=moduser.get('height',qs.gender)
+        if(not qs.height.isdigit()):
+            raise exceptions.ParseError("키는 숫자여야만합니다")
         qs.weight=moduser.get('weight',qs.weight)
+        if(not qs.weight.isdigit()):
+            raise exceptions.ParseError("체중은 숫자여야만합니다")
         qs.vegan_option=moduser.get('vegan_option',qs.vegan_option)
         qs.allergy=moduser.get('allergy',qs.allergy)
         qs.favor_category=moduser.get('favor_category',qs.favor_category)
         qs.avoid_category=moduser.get('avoid_category',qs.avoid_category)
-
+        qs.save()
+        serializer=self.get_serializer(qs,many=True)
+        return Response(serializer.data)
+        
 class ProductSet(viewsets.ModelViewSet):
     queryset=Product.objects.all()
     serializer_class = Productserializers
