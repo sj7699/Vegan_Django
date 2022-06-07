@@ -78,13 +78,15 @@ class cut_by_price(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [JWTAuthentication, BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
-        print(self.request.user.token)
         price=self.request.query_params.get('price',None)
         rqs=self.queryset.order_by('?')
-        print(self.request.user.id)
+        if(price==None):
+            raise ValidationError("파라미터가 필요합니다 (가격)")
         if not price.isdigit():
             raise ValidationError("가격은 숫자만")
         price=int(price)
+        if(price<1000):
+            raise ValidationError("가격은 1000원이상")
         c=0
         cutcqs=[]
         for x in rqs:
