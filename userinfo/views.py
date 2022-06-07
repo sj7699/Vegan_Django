@@ -103,32 +103,33 @@ class meal_by_client(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication, BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
-        rqs=[]
         product_list=self.request.data
+        rqs=[]
         for x in product_list:
             meal_list= Daily_Meal.objects.filter(created_at__date=timezone.now().date())
-            if(not self.queryset.filter(id=x.id).exists()):
+            if(not self.queryset.filter(id=x['id']).exists()):
                 raise ValidationError("존재하지않는 품목입니다")
-            if(x.wtime!="아침" and x.wtime!="점심" and x.wtime!="저녁"):
+            if(x['wtime']!="아침" and x['wtime']!="점심" and x['wtime']!="저녁"):
                 raise ValidationError("아침 점심 저녁을 선택해주세요")
             meal_id=1
-            if(x.wtime=="아침"):
+            if(x['wtime']=="아침"):
                 if(not meal_list.filter(morning=True).exists()):
                     meal_id=Daily_Meal.objects.create(user=self.request.user,morning=True)
                 else:
                     meal_id=meal_list.filter(morning=True)[0]
-            if(x.wtime=="점심"):
+            if(x['wtime']=="점심"):
                 if(not meal_list.filter(lunch=True).exists()):
                     meal_id=Daily_Meal.objects.create(user=self.request.user,lunch=True)
                 else:
                     meal_id=meal_list.filter(lunch=True)[0]
-            if(x.wtime=="저녁"):
+            if(x['wtime']=="저녁"):
                 if(not meal_list.filter(dinner=True).exists()):
                     meal_id=Daily_Meal.objects.create(user=self.request.user,dinner=True)
                 else:
                     meal_id=meal_list.filter(dinner=True)[0]
-            rqs.append(x)
-            MEAL_PRODUCT.create(meal_id=meal_id,product_id=x)
+            nowp=self.queryset.get(id=x['id'])
+            MEAL_PRODUCT.objects.create(meal_id=meal_id,product_id=nowp)
+            rqs.append(nowp)
         return rqs
 
 class rlist(viewsets.ReadOnlyModelViewSet):
