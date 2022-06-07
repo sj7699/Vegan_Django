@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication ,TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
+from dj_rest_auth.jwt_auth import JWTCookieAuthentication
 from django.utils import timezone
 import random
 class FavorcategorySet(viewsets.ModelViewSet):
@@ -63,23 +64,23 @@ class ProductSet(viewsets.ModelViewSet):
                 raise exceptions.ParseError("product_price_order should be 오름차순 or 내림차순")
             if(qparam_price_order=="오름차순"):
                 qs=qs.order_by('price')
-            if(qparam_price_order is "내림차순"):
+            if(qparam_price_order == "내림차순"):
                 qs=qs.order_by(-'price')
         qparam_product_name_order=request.query_params.get("product_name_order")
         if(qparam_product_name_order is not None):
             if(qparam_product_name_order!="오름차순" & qparam_product_name_order!="내림차순"):
                 raise exceptions.ParseError("product_name_order should be 오름차순 or 내림차순")
-            if(qparam_product_name_order is "오름차순"):
+            if(qparam_product_name_order == "오름차순"):
                 qs=qs.order_by('price')
-            if(qparam_product_name_order is "내림차순"):
+            if(qparam_product_name_order == "내림차순"):
                 qs=qs.order_by(-'price')
         qparam_calory_order=request.query_params.get("calory_order")
         if(qparam_calory_order is not None):
             if(qparam_calory_order!="오름차순" & qparam_calory_order!="내림차순"):
                 raise exceptions.ParseError("calory_order should be 오름차순 or 내림차순")
-            if(qparam_calory_order is "오름차순"):
+            if(qparam_calory_order == "오름차순"):
                 qs=qs.order_by('calory')
-            if(qparam_calory_order is "내림차순"):
+            if(qparam_calory_order == "내림차순"):
                 qs=qs.order_by(-'calory')
         qparam_product_name=request.query_params.get("product_name")
         if(qparam_product_name is not None):
@@ -126,18 +127,18 @@ class ProductSet(viewsets.ModelViewSet):
 class cut_by_price(viewsets.ReadOnlyModelViewSet):
     queryset=Product.objects.all().order_by('?')
     serializer_class=Productserializers
-    authentication_classes = [JWTAuthentication, BasicAuthentication, SessionAuthentication]
+    authentication_classes = [JWTCookieAuthentication, BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
         price=self.request.query_params.get('price',None)
         rqs=self.queryset.order_by('?')
         if(price==None):
-            raise ValidationError("파라미터가 필요합니다 (가격)")
+            raise exceptions.ParseError("파라미터가 필요합니다 (가격)")
         if not price.isdigit():
-            raise ValidationError("가격은 숫자만")
+            raise exceptions.ParseError("가격은 숫자만")
         price=int(price)
         if(price<1000):
-            raise ValidationError("가격은 1000원이상")
+            raise exceptions.ParseError("가격은 1000원이상")
         c=0
         cutcqs=[]
         for x in rqs:
@@ -159,9 +160,9 @@ class meal_by_client(viewsets.ModelViewSet):
         for x in product_list:
             meal_list= Daily_Meal.objects.filter(created_at__date=timezone.now().date())
             if(not self.queryset.filter(id=x['id']).exists()):
-                raise ValidationError("존재하지않는 품목입니다")
+                raise exceptions.ParseError("존재하지않는 품목입니다")
             if(x['wtime']!="아침" and x['wtime']!="점심" and x['wtime']!="저녁"):
-                raise ValidationError("아침 점심 저녁을 선택해주세요")
+                raise exceptions.ParseError("아침 점심 저녁을 선택해주세요")
             meal_id=1
             if(x['wtime']=="아침"):
                 if(not meal_list.filter(morning=True).exists()):
@@ -192,13 +193,13 @@ class rlist(viewsets.ReadOnlyModelViewSet):
         calory=self.request.query_params.get('calory',None)
         rqs=self.queryset.order_by('?')
         if not calory.isdigit():
-            raise ValidationError("칼로리는 숫자만")
+            raise exceptions.ParseError("칼로리는 숫자만")
         wtime=self.request.query_params.get('time',None)
         print(wtime)
         if(wtime is None):
-            raise ValidationError("식사할 시간을 입력해주세요 예) 아침 점심 저녁")
+            raise exceptions.ParseError("식사할 시간을 입력해주세요 예) 아침 점심 저녁")
         if(wtime!="아침" and wtime!="점심" and wtime!="저녁"):
-            raise ValidationError("식사할 시간을 정확히 입력해주세요 예) 아침 점심 저녁")
+            raise exceptions.ParseError("식사할 시간을 정확히 입력해주세요 예) 아침 점심 저녁")
         calory=float(calory)
         c=0
         cutcqs=[]

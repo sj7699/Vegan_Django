@@ -3,17 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from . models import *
 from rest_framework.authtoken.models import Token
-from rest_framework.validators import UniqueValidator
-class Favorcategoryserializers(serializers.ModelSerializer):
-    class Meta:
-        model=Favor_Category
-        fields='__all__'
-
-class Allergyserializers(serializers.ModelSerializer):
-    class Meta:
-        model=Allergy
-        fields='__all__'
-        
+from rest_framework.validators import UniqueValidator   
 class Daily_Mealserializers(serializers.ModelSerializer):
     class Meta:
         model=Daily_Meal
@@ -56,4 +46,9 @@ class Ingredient_Detailserializers(serializers.ModelSerializer):
 class Product_Ingredientserializers(serializers.ModelSerializer):
     class Meta:
         model=Product_Ingredient
+        fields='__all__'
+
+class User_Detailserializers(serializers.ModelSerializer):
+    class Meta:
+        model=User_Detail
         fields='__all__'
