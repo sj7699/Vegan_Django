@@ -17,6 +17,14 @@ from dj_rest_auth.jwt_auth import JWTCookieAuthentication
 from django.utils import timezone
 import random
 
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+
+
 class Daily_MealSet(viewsets.ReadOnlyModelViewSet):
     queryset=Daily_Meal.objects.all()
     serializer_class = Daily_Mealserializers
@@ -27,13 +35,17 @@ class Meal_ProductSet(viewsets.ReadOnlyModelViewSet):
 
 class User_DetailSet(viewsets.ModelViewSet):
     queryset=User_Detail.objects.all()
-    serializer_calss=User_Detailserializers
+    serializer_class=User_Detailserializers
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
-        qs=get_object_or_404(self.queryset,user=self.request.user)
-        serializer = self.get_serializer(qs,many=True)
-        return Response(serializer.data)
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        if(self.queryset.filter(user=self.request.user).exists()):
+            raise exceptions.ParseError("이미 존재하는 userdetail")
+        serializer.save(user=self.request.user)
     @action(detail=False,methods=['post'])
-    def modify_user(self):
+    def modify_user(self,request):      
         nowuser=self.request.user
         moduser=self.request.data
         qs=get_object_or_404(self.queryset,user=nowuser)
@@ -42,19 +54,15 @@ class User_DetailSet(viewsets.ModelViewSet):
             raise exceptions.ParseError("exercise should be low middle high")
         qs.gender=moduser.get('gender',qs.gender)
         qs.height=moduser.get('height',qs.gender)
-        if(not qs.height.isdigit()):
-            raise exceptions.ParseError("키는 숫자여야만합니다")
         qs.weight=moduser.get('weight',qs.weight)
-        if(not qs.weight.isdigit()):
-            raise exceptions.ParseError("체중은 숫자여야만합니다")
         qs.vegan_option=moduser.get('vegan_option',qs.vegan_option)
         qs.allergy=moduser.get('allergy',qs.allergy)
         qs.favor_category=moduser.get('favor_category',qs.favor_category)
         qs.avoid_category=moduser.get('avoid_category',qs.avoid_category)
         qs.save()
-        serializer=self.get_serializer(qs,many=True)
+        serializer=self.get_serializer(qs)
         return Response(serializer.data)
-        
+
 class ProductSet(viewsets.ModelViewSet):
     queryset=Product.objects.all()
     serializer_class = Productserializers
@@ -146,7 +154,22 @@ class cut_by_price(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
         price=self.request.query_params.get('price',None)
+        low_salt=self.request.query_params.get('low_salt',None)
+        low_calory=self.request.query_params.get('low_sugar',None)
+        low_fat=self.request.query_params.get('low_fat',None)
+        low_carbo=self.request.query_params.get('low_carbo',None)
+        high_protein=self.request.query_params.get('high_cabo',None) 
         rqs=self.queryset.order_by('?')
+        if(low_salt!=None):
+            rqs=rqs.filter(sodium__gte=480)
+        if(low_fat!=None):
+            rqs=rqs.filter(fat__gte=9)
+        if(low_calory!=None):
+            rqs=rqs.filter(calory__gte=500)
+        if(high_protein!=None):
+            rqs=rqs.filter(protien__lte=12)
+        if(low_carbo!=None):
+            rqs=rqs.filter(carbohydrate__gte=35)
         if(price==None):
             raise exceptions.ParseError("파라미터가 필요합니다 (가격)")
         if not price.isdigit():

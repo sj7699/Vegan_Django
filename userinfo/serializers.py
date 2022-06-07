@@ -1,9 +1,19 @@
+from asyncio.windows_events import NULL
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from . models import *
 from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator   
+from rest_framework import viewsets,generics,exceptions,status
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+
 class Daily_Mealserializers(serializers.ModelSerializer):
     class Meta:
         model=Daily_Meal
@@ -52,3 +62,15 @@ class User_Detailserializers(serializers.ModelSerializer):
     class Meta:
         model=User_Detail
         fields='__all__'
+    def validate_exercise(self,instance):
+        if(instance!="low" and instance!="middle" and instance!="high"):
+            raise exceptions.ParseError("exercise shoudld be low middle high")
+        return instance
+    def validate_height(self,instance):
+        if(not isfloat(instance)):
+            raise exceptions.ParseError("키는 숫자여야만합니다")
+        return instance
+    def validate_weight(self,instance):
+        if(not isfloat(instance)):
+            raise exceptions.ParseError("체중은 숫자여야만합니다")
+        return instance

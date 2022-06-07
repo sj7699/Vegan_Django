@@ -29,6 +29,7 @@ class Product(models.Model):
     company=models.CharField(max_length=100,default="") 
     ingredient=models.CharField(max_length=800,default="Nothing")
     amount=models.FloatField()
+    serving_size=models.FloatField()
     soduim=models.FloatField()
     carbohydrate=models.FloatField()
     sugar=models.FloatField()
