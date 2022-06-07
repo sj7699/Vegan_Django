@@ -40,7 +40,7 @@ class Product(models.Model):
     protein=models.FloatField()
     calory=models.FloatField(default=0)
     vegan_option=models.CharField(max_length=50,default="")
-    specific=models.CharField(max_length=100,default="")
+    specific=models.CharField(max_length=100,default="",blank=True,null=False)
     primary_type=models.CharField(max_length=50,default="")
     secondary_type=models.CharField(max_length=50,default="")
     product_category=models.CharField(max_length=50,default="")
