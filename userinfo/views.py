@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from userinfo.models import Favor_Category,Product,Daily_Meal
 from .serializers import *
-from rest_framework import viewsets,generics
+from django.db.models import Q
+from rest_framework import viewsets,generics,exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication ,TokenAuthentication
@@ -43,8 +44,58 @@ class ProductSet(viewsets.ModelViewSet):
     serializer_class = Productserializers
     @action(detail=False)
     def plist(self,request):
-        
         qs=self.queryset
+        qparam_price_low_range=request.query_params.get("price_low")
+        if(qparam_price_low_range is not None):
+            if(not qparam_price_low_range.isdigit()):
+                raise exceptions.ParseError("가격범위는 숫자만")
+            qparam_price_low_range=int(qparam_price_low_range)
+            qs=qs.filter(price__gte=qparam_price_low_range)
+        qparam_price_high_range=request.query_params.get("price_high")
+        if(qparam_price_high_range is not None):
+            if(not qparam_price_high_range.isdigit()):
+                raise exceptions.ParseError("가격범위는 숫자만")
+            qparam_price_high_range=int(qparam_price_high_range)
+            qs=qs.filter(price__lte=qparam_price_high_range)
+        qparam_price_order=request.query_params.get("price_order")
+        if(qparam_price_order is not None):
+            if(qparam_price_order!="오름차순" & qparam_price_order!="내림차순"):
+                raise exceptions.ParseError("product_price_order should be 오름차순 or 내림차순")
+            if(qparam_price_order=="오름차순"):
+                qs=qs.order_by('price')
+            if(qparam_price_order is "내림차순"):
+                qs=qs.order_by(-'price')
+        qparam_product_name_order=request.query_params.get("product_name_order")
+        if(qparam_product_name_order is not None):
+            if(qparam_product_name_order!="오름차순" & qparam_product_name_order!="내림차순"):
+                raise exceptions.ParseError("product_name_order should be 오름차순 or 내림차순")
+            if(qparam_product_name_order is "오름차순"):
+                qs=qs.order_by('price')
+            if(qparam_product_name_order is "내림차순"):
+                qs=qs.order_by(-'price')
+        qparam_calory_order=request.query_params.get("calory_order")
+        if(qparam_calory_order is not None):
+            if(qparam_calory_order!="오름차순" & qparam_calory_order!="내림차순"):
+                raise exceptions.ParseError("calory_order should be 오름차순 or 내림차순")
+            if(qparam_calory_order is "오름차순"):
+                qs=qs.order_by('calory')
+            if(qparam_calory_order is "내림차순"):
+                qs=qs.order_by(-'calory')
+        qparam_product_name=request.query_params.get("product_name")
+        if(qparam_product_name is not None):
+            qs=qs.filter(product_name__icontains=qparam_product_name)
+        qparam_calory_low_range=request.query_params.get("calory_low")
+        if(qparam_calory_low_range is not None):
+            if(not qparam_calory_low_range.isdigit()):
+                raise exceptions.ParseError("칼로리는 숫자만")
+            qparam_calory_low_range=int(qparam_calory_low_range)
+            qs=qs.filter(calory__gte=qparam_calory_low_range)
+        qparam_calory_high_range=request.query_params.get("calory_high")
+        if(qparam_calory_high_range is not None):
+            if(not qparam_calory_high_range.isdigit()):
+                raise exceptions.ParseError("칼로리는 숫자만")
+            qparam_calory_high_range=int(qparam_calory_high_range)
+            qs=qs.filter(calory__lte=qparam_calory_high_range)
         serializer = self.get_serializer(qs,many=True)
         return Response(serializer.data)
 
