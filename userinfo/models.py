@@ -24,7 +24,7 @@ class Daily_Meal(models.Model):
     dinner = models.BooleanField(default=False)
 
 class Product(models.Model):
-    product_name=models.CharField(max_length=100)
+    product_name=models.CharField(max_length=100,default="")
     price=models.IntegerField()
     company=models.CharField(max_length=100,default="") 
     ingredient=models.CharField(max_length=800,default="Nothing")
@@ -39,12 +39,12 @@ class Product(models.Model):
     cholesterol=models.FloatField()
     protein=models.FloatField()
     calory=models.FloatField(default=0)
-    vegan_option=models.CharField(max_length=50)
-    specific=models.CharField(max_length=100)
-    primary_type=models.CharField(max_length=50)
-    secondary_type=models.CharField(max_length=50)
+    vegan_option=models.CharField(max_length=50,default="")
+    specific=models.CharField(max_length=100,default="")
+    primary_type=models.CharField(max_length=50,default="")
+    secondary_type=models.CharField(max_length=50,default="")
     product_category=models.CharField(max_length=50,default="")
-    cooking_type=models.CharField(max_length=50)
+    cooking_type=models.CharField(max_length=50,default="")
     product_image=models.ImageField(upload_to="product_image/%Y/%m/%d",default='DEFAULT.jpg')
 
 class MEAL_PRODUCT(models.Model):
