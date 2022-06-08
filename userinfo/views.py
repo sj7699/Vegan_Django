@@ -38,9 +38,11 @@ class User_DetailSet(viewsets.ModelViewSet):
     serializer_class=User_Detailserializers
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
+        if(not self.queryset.filter(user=self.request.user).exists()):
+            raise exceptions.ParseError("userdetail을 먼저 post해주세요")
         return self.queryset.filter(user=self.request.user)
-
     def perform_create(self, serializer):
+        print(self.request.data)
         if(self.queryset.filter(user=self.request.user).exists()):
             raise exceptions.ParseError("이미 존재하는 userdetail")
         serializer.save(user=self.request.user)
@@ -53,7 +55,8 @@ class User_DetailSet(viewsets.ModelViewSet):
         if(qs.exercise!="low" and qs.exercise!="middle" and qs.exercise!="high"):
             raise exceptions.ParseError("exercise should be low middle high")
         qs.gender=moduser.get('gender',qs.gender)
-        qs.height=moduser.get('height',qs.gender)
+        qs.height=moduser.get('height',qs.height)
+        print(moduser['weight'])
         qs.weight=moduser.get('weight',qs.weight)
         qs.vegan_option=moduser.get('vegan_option',qs.vegan_option)
         qs.allergy=moduser.get('allergy',qs.allergy)
@@ -153,6 +156,8 @@ class cut_by_price(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [JWTCookieAuthentication, BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
+        if(not User_Detail.objects.filter(user=self.request.user).exists()):
+            raise exceptions.ParseError("유저정보를 기입해주세요")
         price=self.request.query_params.get('price',None)
         low_salt=self.request.query_params.get('low_salt',None)
         low_calory=self.request.query_params.get('low_sugar',None)
