@@ -55,8 +55,7 @@ class User_DetailSet(viewsets.ModelViewSet):
         if(qs.exercise!="low" and qs.exercise!="middle" and qs.exercise!="high"):
             raise exceptions.ParseError("exercise should be low middle high")
         qs.gender=moduser.get('gender',qs.gender)
-        qs.height=moduser.get('height',qs.height)
-        print(moduser['weight'])
+        qs.height=moduser.get   ('height',qs.height)
         qs.weight=moduser.get('weight',qs.weight)
         qs.vegan_option=moduser.get('vegan_option',qs.vegan_option)
         qs.allergy=moduser.get('allergy',qs.allergy)
@@ -86,28 +85,28 @@ class ProductSet(viewsets.ModelViewSet):
             qs=qs.filter(price__lte=qparam_price_high_range)
         qparam_price_order=request.query_params.get("price_order")
         if(qparam_price_order is not None):
-            if(qparam_price_order!="오름차순" & qparam_price_order!="내림차순"):
-                raise exceptions.ParseError("product_price_order should be 오름차순 or 내림차순")
-            if(qparam_price_order=="오름차순"):
+            if(qparam_price_order!="asc" and qparam_price_order!="desc"):
+                raise exceptions.ParseError("product_price_order should be asc or desc")
+            if(qparam_price_order=="asc"):
                 qs=qs.order_by('price')
-            if(qparam_price_order == "내림차순"):
-                qs=qs.order_by(-'price')
+            if(qparam_price_order == "desc"):
+                qs=qs.order_by('-price')
         qparam_product_name_order=request.query_params.get("product_name_order")
         if(qparam_product_name_order is not None):
-            if(qparam_product_name_order!="오름차순" & qparam_product_name_order!="내림차순"):
-                raise exceptions.ParseError("product_name_order should be 오름차순 or 내림차순")
-            if(qparam_product_name_order == "오름차순"):
-                qs=qs.order_by('price')
-            if(qparam_product_name_order == "내림차순"):
-                qs=qs.order_by(-'price')
+            if(qparam_product_name_order!="asc" and qparam_product_name_order!="desc"):
+                raise exceptions.ParseError("product_name_order should be asc or desc")
+            if(qparam_product_name_order == "asc"):
+                qs=qs.order_by('product_name')
+            if(qparam_product_name_order == "desc"):
+                qs=qs.order_by('-product_name')
         qparam_calory_order=request.query_params.get("calory_order")
         if(qparam_calory_order is not None):
-            if(qparam_calory_order!="오름차순" & qparam_calory_order!="내림차순"):
-                raise exceptions.ParseError("calory_order should be 오름차순 or 내림차순")
-            if(qparam_calory_order == "오름차순"):
+            if(qparam_calory_order!="asc" and qparam_calory_order!="desc"):
+                raise exceptions.ParseError("calory_order should be asc or desc")
+            if(qparam_calory_order == "asc"):
                 qs=qs.order_by('calory')
-            if(qparam_calory_order == "내림차순"):
-                qs=qs.order_by(-'calory')
+            if(qparam_calory_order == "desc"):
+                qs=qs.order_by('-calory')
         qparam_product_name=request.query_params.get("product_name")
         if(qparam_product_name is not None):
             qs=qs.filter(product_name__icontains=qparam_product_name)
@@ -153,7 +152,6 @@ class ProductSet(viewsets.ModelViewSet):
 class cut_by_price(viewsets.ReadOnlyModelViewSet):
     queryset=Product.objects.all().order_by('?')
     serializer_class=Productserializers
-    authentication_classes = [JWTCookieAuthentication, BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
         if(not User_Detail.objects.filter(user=self.request.user).exists()):
@@ -163,18 +161,18 @@ class cut_by_price(viewsets.ReadOnlyModelViewSet):
         low_calory=self.request.query_params.get('low_sugar',None)
         low_fat=self.request.query_params.get('low_fat',None)
         low_carbo=self.request.query_params.get('low_carbo',None)
-        high_protein=self.request.query_params.get('high_cabo',None) 
+        high_protein=self.request.query_params.get('high_protein',None) 
         rqs=self.queryset.order_by('?')
         if(low_salt!=None):
-            rqs=rqs.filter(sodium__gte=480)
+            rqs=rqs.filter(sodium__lte=480)
         if(low_fat!=None):
-            rqs=rqs.filter(fat__gte=9)
+            rqs=rqs.filter(fat__lte=9)
         if(low_calory!=None):
-            rqs=rqs.filter(calory__gte=500)
+            rqs=rqs.filter(calory__lte=500)
         if(high_protein!=None):
-            rqs=rqs.filter(protien__lte=12)
+            rqs=rqs.filter(protein__gte=12)
         if(low_carbo!=None):
-            rqs=rqs.filter(carbohydrate__gte=35)
+            rqs=rqs.filter(carbohydrate__lte=35)
         if(price==None):
             raise exceptions.ParseError("파라미터가 필요합니다 (가격)")
         if not price.isdigit():
@@ -195,10 +193,9 @@ class cut_by_price(viewsets.ReadOnlyModelViewSet):
 class meal_by_client(viewsets.ModelViewSet):
     queryset=Product.objects.all()
     serializer_class=Productserializers
-    authentication_classes = [JWTAuthentication, BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
-    def get_queryset(self):
-        product_list=self.request.data
+    def create(self, request, *args, **kwargs):
+        product_list=request.data
         rqs=[]
         for x in product_list:
             meal_list= Daily_Meal.objects.filter(created_at__date=timezone.now().date())
@@ -225,6 +222,7 @@ class meal_by_client(viewsets.ModelViewSet):
             nowp=self.queryset.get(id=x['id'])
             MEAL_PRODUCT.objects.create(meal_id=meal_id,product_id=nowp)
             rqs.append(nowp)
-        return rqs
+        serial=self.get_serializer(rqs,many=True)
+        return Response(serial.data)
 
 # Create your views here.
