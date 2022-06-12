@@ -14,10 +14,8 @@ def isfloat(num):
     except ValueError:
         return False
 
-class Daily_Mealserializers(serializers.ModelSerializer):
-    class Meta:
-        model=Daily_Meal
-        fields='__all__'
+
+
 
 class Productserializers(serializers.ModelSerializer):
     class Meta:
@@ -37,12 +35,54 @@ class Productserializers(serializers.ModelSerializer):
         if(len(instance)<1):
             raise serializers.ValidationError(detail="카테고리를 입력해주세요.")
         return instance
-
     def validate_amount(self,instance):
         if(instance<1):
             raise serializers.ValidationError(detail="용량이 너무 낮습니다")
         return instance
 
+class Daily_Mealserializers(serializers.ModelSerializer):
+    product_name= serializers.CharField(source='product_id.product_name')
+    price=serializers.IntegerField(source='product_id.price')
+    company=serializers.CharField(source='product_id.company') 
+    ingredient=serializers.CharField(source='product_id.ingredient')
+    amount=serializers.FloatField(source='product_id.amount')
+    serving_size=serializers.FloatField(source='product_id.serving_size')
+    sodium=serializers.FloatField(source='product_id.sodium')
+    carbohydrate=serializers.FloatField(source='product_id.carbohydrate')
+    sugar=serializers.FloatField(source='product_id.sugar')
+    fat=serializers.FloatField(source='product_id.fat')
+    trans_fat=serializers.FloatField(source='product_id.trans_fat')
+    sat_fat=serializers.FloatField(source='product_id.sat_fat')
+    cholesterol=serializers.FloatField(source='product_id.cholesterol')
+    protein=serializers.FloatField(source='product_id.protein')
+    calory=serializers.FloatField(source='product_id.calory')
+    vegan_option=serializers.CharField(source='product_id.vegan_option')
+    specific=serializers.CharField(source='product_id.specific')
+    primary_type=serializers.CharField(source='product_id.primary_type')
+    secondary_type=serializers.CharField(source='product_id.secondary_type')
+    product_category=serializers.CharField(source='product_id.product_category')
+    cooking_type=serializers.CharField(source='product_id.cooking_type')
+    product_image=serializers.ImageField(source='product_id.product_image')
+    wtime=serializers.SerializerMethodField(source='get_wtime')
+    wdate=serializers.SerializerMethodField(source='get_wdate')
+    class Meta:
+        model=MEAL_PRODUCT
+        fields=(
+            'product_name','price','wtime','wdate',
+            'company','ingredient','amount','serving_size','sodium','carbohydrate',
+            'sugar','fat','trans_fat','sat_fat','cholesterol','protein','calory','vegan_option',
+            'specific','primary_type','secondary_type','product_category','cooking_type','product_image',
+        )
+    def get_wtime(self,m):
+        if(m.meal_id.morning):
+            return "아침"
+        if(m.meal_id.lunch):
+            return "점심"
+        if(m.meal_id.dinner):
+            return "저녁"
+        return "저녁"
+    def get_wdate(self,m):
+        return m.meal_id.created_at.date()
 class MEAL_PRODUCTserializers(serializers.ModelSerializer):
     class Meta:
         model=MEAL_PRODUCT

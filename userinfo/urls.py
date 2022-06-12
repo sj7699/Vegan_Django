@@ -9,6 +9,7 @@ router.register(r'product',views.ProductSet)
 router.register(r'meal_by_client',views.meal_by_client)
 router.register(r'cut_by_price',views.cut_by_price)
 router.register(r'user_detail',views.User_DetailSet)
+router.register(r'get_meal',views.get_meal_list)
 urlpatterns=[
     path('',include(router.urls)),
 ]

@@ -190,12 +190,23 @@ class cut_by_price(viewsets.ReadOnlyModelViewSet):
             cutcqs.append(x)
         return cutcqs
 
+class get_meal_list(viewsets.ReadOnlyModelViewSet):
+    queryset=Daily_Meal.objects.all()
+    serializer_class=Daily_Mealserializers
+    permission_classes = [IsAuthenticated]
+    def list(self, request, *args, **kwargs):
+        meal_list= Daily_Meal.objects.filter(Q(user=self.request.user)&Q(created_at__date__gte=timezone.now().date()-timezone.timedelta(days=7)))
+        mplist= MEAL_PRODUCT.objects.filter(meal_id__in=meal_list)
+        serial=self.get_serializer(mplist,many=True)
+        return Response(serial.data)
+
 class meal_by_client(viewsets.ModelViewSet):
     queryset=Product.objects.all()
     serializer_class=Productserializers
     permission_classes = [IsAuthenticated]
     def create(self, request, *args, **kwargs):
         product_list=request.data
+        print(product_list)
         rqs=[]
         for x in product_list:
             meal_list= Daily_Meal.objects.filter(created_at__date=timezone.now().date())
@@ -205,17 +216,17 @@ class meal_by_client(viewsets.ModelViewSet):
                 raise exceptions.ParseError("아침 점심 저녁을 선택해주세요")
             meal_id=1
             if(x['wtime']=="아침"):
-                if(not meal_list.filter(morning=True).exists()):
+                if(not meal_list.filter(user=request.user,morning=True).exists()):
                     meal_id=Daily_Meal.objects.create(user=self.request.user,morning=True)
                 else:
                     meal_id=meal_list.filter(morning=True)[0]
             if(x['wtime']=="점심"):
-                if(not meal_list.filter(lunch=True).exists()):
+                if(not meal_list.filter(user=request.user,lunch=True).exists()):
                     meal_id=Daily_Meal.objects.create(user=self.request.user,lunch=True)
                 else:
                     meal_id=meal_list.filter(lunch=True)[0]
             if(x['wtime']=="저녁"):
-                if(not meal_list.filter(dinner=True).exists()):
+                if(not meal_list.filter(user=request.user,dinner=True).exists()):
                     meal_id=Daily_Meal.objects.create(user=self.request.user,dinner=True)
                 else:
                     meal_id=meal_list.filter(dinner=True)[0]
