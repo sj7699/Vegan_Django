@@ -71,6 +71,9 @@ class ProductSet(viewsets.ModelViewSet):
     @action(detail=False)
     def plist(self,request):
         qs=self.queryset
+        qparam_popular=request.query_params.get("popular")
+        if(qparam_popular is not None):
+            qs #이부분
         qparam_price_low_range=request.query_params.get("price_low")
         if(qparam_price_low_range is not None):
             if(not qparam_price_low_range.isdigit()):
